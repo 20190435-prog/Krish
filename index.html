@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Birthday Letter</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Dancing Script', cursive;
+}
+
+body {
+    background: url('birthdaybackground.jpeg') center/cover no-repeat fixed;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;   /* MOVED DOWN */
+}
+
+/* Overlay */
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(3px);
+    background: rgba(0,0,0,0.15);
+}
+
+/* Letter */
+.letter {
+    position: relative;
+    width: 420px;
+    height: 520px;
+    background: linear-gradient(135deg, #f5e6c8, #e8d3a5);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+    padding: 30px;
+    z-index: 2;
+    border: 1px solid rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 40px;   /* FLOATING ABOVE BOTTOM */
+}
+
+/* Paper texture */
+.letter::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+    opacity: 0.35;
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+/* Scrollable text */
+.text {
+    position: relative;
+    flex: 1;
+    overflow-y: auto;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #3b2f1e;
+    white-space: pre-wrap;
+    padding-right: 6px;
+}
+
+/* Button */
+.music-btn {
+    margin-top: 12px;
+    align-self: center;
+    padding: 8px 14px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(45deg, #ff5f6d, #ffc371);
+    color: white;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    transition: 0.25s;
+}
+
+.music-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Confetti */
+#confetti {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+<canvas id="confetti"></canvas>
+
+<div class="letter">
+    <div class="text" id="typedText"></div>
+    <button class="music-btn" onclick="toggleMusic()">🎵 Play music</button>
+</div>
+
+<audio id="bgMusic">
+    <source src="birthdaysong.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* Typewriter */
+const message = `February 23
+
+Dear Aanantha Krishnan...
+
+I wish you a very happy birthday.
+You're one of the best people I know. I trust you like I trust very little people in my life.
+Wonderful things are going to come your way and your life is going to continue improving, and whether or not I'm there to see it, know that I'm going to be happy if you're happy.
+You deserve the world, and I have a lot to thank you for.
+I hope your life can be filled with joy and the sense of fulfillment, and know that even if things are not going your way, you got it. Always.
+
+If I've learned something in this life is that, light is procedural, Krish. It'll get dark, but the sun will rise again.
+No matter what happens, I want you to know that I got you, and that I'm here for you even when you decide you can do it on your own.
+I'm always a text away.
+
+I'm very glad to have met you, you'll always be an important part of my life. I don't believe in god, sometimes not even in destiny, but I thank whatever put us in each other's way (even if that thing is only us playing with fate).
+
+You'll always be loved and admired by many people in your life. You're leaving a mark, even when you worry you aren't.
+
+With love...
+
+
+Elie.`;
+
+let i = 0;
+function typeWriter() {
+    if (i < message.length) {
+        const box = document.getElementById("typedText");
+        box.textContent += message.charAt(i);
+        box.scrollTop = box.scrollHeight;
+        i++;
+        setTimeout(typeWriter, 35);
+    }
+}
+typeWriter();
+
+/* Music */
+const music = document.getElementById("bgMusic");
+const btn = document.querySelector(".music-btn");
+
+function toggleMusic() {
+    if (music.paused) {
+        music.play();
+        btn.textContent = "🔊 Music playing";
+    } else {
+        music.pause();
+        btn.textContent = "🎵 Play music";
+    }
+}
+
+/* Dusty rainbow confetti */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+const confetti = Array.from({length: 120}).map(() => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 6 + 4,
+    d: Math.random() * 120,
+    color: `hsl(${Math.random()*360}, 70%, 65%)`, /* DUSTY COLORS */
+    tilt: Math.random() * 10 - 10
+}));
+
+function drawConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    confetti.forEach(c => {
+        ctx.beginPath();
+        ctx.fillStyle = c.color;
+        ctx.ellipse(c.x, c.y, c.r, c.r/2, c.tilt, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    updateConfetti();
+    requestAnimationFrame(drawConfetti);
+}
+
+function updateConfetti() {
+    confetti.forEach(c => {
+        c.y += Math.cos(c.d) + 1 + c.r / 2;
+        c.x += Math.sin(c.d);
+
+        if (c.y > canvas.height) {
+            c.y = -10;
+            c.x = Math.random() * canvas.width;
+        }
+    });
+}
+
+drawConfetti();
+</script>
+
+</body>
+</html>
